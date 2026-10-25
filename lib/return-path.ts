@@ -1,0 +1,1 @@
+export function returnPath(value:string|null){if(!value||!value.startsWith('/')||value.startsWith('//')||value.includes('\\'))return '/';const u=new URL(value,'https://relay.invalid');return u.origin==='https://relay.invalid'?u.pathname+u.search:'/';}

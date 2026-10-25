@@ -1,0 +1,8 @@
+import {z} from 'zod';
+const text=z.string().max(2000),id=z.string().min(1).max(100),name=z.string().trim().min(1).max(100),minute=z.number().int().min(0).max(1440),date=z.string().regex(/^\d{4}-\d{2}-\d{2}$/),tags=z.array(z.string().max(100)).max(50);
+const base=z.object({id,name,description:text,category:z.string().max(100),duration:z.number().int().min(1).max(1440),earliest:minute,latest:minute,fixed:z.boolean(),priority:z.enum(['normal','high']),required:tags,preferred:z.string().max(100),buffer:z.number().int().min(0).max(1440),notes:text});
+const task=base.extend({date,allowedDates:z.array(date).min(1).max(60),templateId:id.optional(),caregiver:id.optional(),start:minute.optional(),status:z.enum(['proposed','pending','confirmed','declined','completed','cancelled','unassigned']),excluded:tags});
+const interval=z.object({start:minute,end:minute});
+export const stateSchema=z.object({version:z.literal(1),onboarded:z.boolean(),recipient:name,needs:tags,preferences:text,recurring:z.boolean(),caregivers:z.array(z.object({id,name,role:z.string().max(100),color:z.string().regex(/^#[0-9a-fA-F]{6}$/),maxHours:z.number().min(0).max(168),capabilities:tags,preferences:tags,availability:z.array(interval.extend({day:z.number().int().min(0).max(6)})).max(100),exceptions:z.array(interval.extend({date})).max(500),backups:tags})).max(100),tasks:z.array(task).max(2000),templates:z.array(base.extend({days:z.array(z.number().int().min(0).max(6)).max(7)})).max(100),activity:z.array(z.object({id,at:z.string().max(50),text,read:z.boolean()})).max(500)});
+export const roomName=name;
+export function emptyPlan(recipient:string){return {version:1 as const,onboarded:true,recipient,needs:[],preferences:'',recurring:false,caregivers:[],tasks:[],templates:[],activity:[]};}
