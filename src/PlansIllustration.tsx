@@ -1,22 +1,22 @@
 export default function PlansIllustration() {
   return (
     <figure className="plans-illustration">
-      <figcaption>Care often begins with the everyday things.</figcaption>
+      <figcaption>Care begins with everyday things.</figcaption>
       <svg viewBox="0 0 720 320" role="img" aria-labelledby="plans-art-title plans-art-desc">
         <title id="plans-art-title">Sharing the everyday work of care</title>
         <desc id="plans-art-desc">One person passes a bag of groceries to another.</desc>
 
         <path d="M0 286H720" stroke="#c9c9bb" strokeWidth="2" />
-        <path d="M301 153l-8-31c-4-14 4-26 18-28 14-2 25 7 27 22l4 33" fill="none" stroke="#282e29" strokeWidth="8" strokeLinecap="round" />
-        <path d="M383 151l5-34c2-15 13-24 27-22 14 2 22 14 18 29l-7 30" fill="none" stroke="#282e29" strokeWidth="8" strokeLinecap="round" />
-        <path d="M270 145h188l-15 137H286z" fill="#e9b95d" stroke="#282e29" strokeWidth="3" strokeLinejoin="round" />
-        <path d="M306 145l-11 137M426 145l9 137" stroke="#cb9a44" strokeWidth="2" />
-        <path d="M315 145c3-18 2-35-3-53-6-20-14-30-21-38" fill="none" stroke="#324e45" strokeWidth="4" strokeLinecap="round" />
-        <path d="M315 108c-20-19-29-36-28-55 18 7 30 24 28 55ZM323 117c14-24 32-37 52-38-5 23-25 40-52 38Z" fill="#496e5e" stroke="#282e29" strokeWidth="2" strokeLinejoin="round" />
-        <path d="M386 145c-4-30 5-55 27-75" fill="none" stroke="#324e45" strokeWidth="4" strokeLinecap="round" />
-        <path d="M392 113c-20-5-32-17-38-38 20-1 36 13 38 38ZM402 92c5-23 20-38 40-43-1 20-15 37-40 43Z" fill="#496e5e" stroke="#282e29" strokeWidth="2" strokeLinejoin="round" />
-        <path d="M346 144c-3-25 3-48 18-68 16 18 23 42 21 69" fill="#f3dfb8" stroke="#282e29" strokeWidth="2" />
-        <path d="M344 106l35 20M349 91l33 21" stroke="#caaf81" strokeWidth="2" />
+        <path d="M270 143l14-14h164l14 14-14 15H284Z" fill="#c58e3c" stroke="#282e29" strokeWidth="3" strokeLinejoin="round" />
+        <path d="M312 132c-4-19 8-35 27-38 18-3 35 10 38 28l-1 10" fill="#b64932" stroke="#282e29" strokeWidth="3" />
+        <path d="M339 93l3-11M342 91c7-10 16-13 26-10-4 10-12 15-26 10Z" fill="#496e5e" stroke="#282e29" strokeWidth="2" strokeLinecap="round" />
+        <path d="M370 132l12-66c2-13 14-20 24-17 11 3 16 15 13 27l-15 56" fill="#f3dfb8" stroke="#282e29" strokeWidth="3" strokeLinejoin="round" />
+        <path d="M385 77l23 17M381 98l22 16" stroke="#c6a77d" strokeWidth="2" />
+        <path d="M408 132c4-19 11-34 23-46M420 130c10-17 20-25 34-29" fill="none" stroke="#324e45" strokeWidth="4" strokeLinecap="round" />
+        <path d="M426 96c-14-11-17-22-14-35 16 6 21 18 14 35ZM439 109c8-15 19-23 34-24-3 16-14 24-34 24Z" fill="#496e5e" stroke="#282e29" strokeWidth="2" strokeLinejoin="round" />
+        <path d="M270 143h192l-14 139H284Z" fill="#e9b95d" stroke="#282e29" strokeWidth="3" strokeLinejoin="round" />
+        <path d="M270 143l16 14v125l-16-15ZM462 143l-14 14v125l14-15Z" fill="#d19d4e" stroke="#282e29" strokeWidth="2" />
+        <path d="M286 157h162M286 256h162" stroke="#cb9a44" strokeWidth="2" />
 
         <path d="M0 172l129-24 88 25-11 51-76-12L0 244Z" fill="#b64932" stroke="#282e29" strokeWidth="3" />
         <path d="M201 169l44-16 33 8 8 15-43 2 40 4 8 15-45 1 32 4 4 14-47 2-40-14Z" fill="#d59b76" stroke="#282e29" strokeWidth="3" strokeLinejoin="round" />
