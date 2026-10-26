@@ -79,7 +79,7 @@ function load(): State {
     return demo();
   }
 }
-export default function App({initialState,onChange}:{initialState:State;onChange:(state:State)=>void}) {
+export default function App({initialState,onChange,onDeletePlan,planBusy=false}:{initialState:State;onChange:(state:State)=>void;onDeletePlan?:()=>void;planBusy?:boolean}) {
   const [s, S] = useState<State>(initialState),
     [page, setPage] = useState<Page>(initialState.caregivers.length ? "plan" : "people"),
     [week, W] = useState(weekOf(today())),
@@ -992,6 +992,11 @@ export default function App({initialState,onChange}:{initialState:State;onChange
                 Download a backup
               </button>
             </div>
+            {onDeletePlan && <div className="settings-divider">
+              <h2>Delete this plan</h2>
+              <p>This permanently removes the plan, its tasks, and everyone’s access. Download a backup above if you want to keep a copy.</p>
+              <button className="danger" disabled={planBusy} onClick={onDeletePlan}>{planBusy ? "Deleting…" : "Delete plan"}</button>
+            </div>}
 
           </section>
         )}
