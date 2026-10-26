@@ -6,3 +6,5 @@
 /* Keep the shorter introduction balanced with the illustration. */
 .welcome-copy h1{margin:0 0 16px;line-height:1.08}.welcome-copy .welcome-tagline{margin:0;font-size:28px;font-weight:600;line-height:1.3;color:var(--ink)}.welcome-copy .welcome-purpose{margin:14px 0 0;max-width:410px;font-size:17px;line-height:1.55;color:var(--muted)}.welcome-copy .account-button{margin-top:28px}
 @media(max-width:800px){.welcome-copy h1{margin-bottom:16px}.welcome-copy .welcome-tagline{font-size:24px}.welcome-copy .welcome-purpose{font-size:16px}}
+.plans-illustration{display:grid;grid-template-columns:minmax(200px,1fr) minmax(0,2fr);align-items:center;gap:30px;margin:48px 0 0;padding:28px 0 0;border-top:1px solid var(--line)}.plans-illustration figcaption{max-width:230px;font-size:21px;line-height:1.4;font-weight:600;color:var(--ink)}.plans-illustration svg{display:block;width:100%;height:auto;max-height:300px}
+@media(max-width:680px){.plans-illustration{grid-template-columns:1fr;gap:14px;margin-top:35px;padding-top:24px}.plans-illustration figcaption{max-width:320px;font-size:18px}}
