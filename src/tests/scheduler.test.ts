@@ -8,6 +8,7 @@ import {
   reasons,
   active,
   expand,
+  assignmentBlockers,
 } from "../engine/scheduler";
 import { Task, weekOf, today } from "../models";
 test("demo and generated plans obey every hard constraint", () => {
@@ -109,4 +110,32 @@ test("recurrence expansion is idempotent and preserves completed instances", () 
   const second = expand([template], first, weekOf(today()));
   assert.equal(second.length, 2);
   assert.equal(second[0].status, "completed");
+});
+
+
+test("assignment results explain missing availability and assign after it is supplied", () => {
+  const seed = demo();
+  const task: Task = {...seed.tasks[0], id: "new-task", status: "unassigned", caregiver: undefined, start: undefined, required: [], excluded: [], duration: 60, buffer: 0, earliest: 900, latest: 960, fixed: true};
+  task.allowedDates = [task.date];
+  const person = {...seed.caregivers[0], availability: [], exceptions: []};
+  const blocked = generate([task], [person]);
+  assert.equal(active(blocked[0]), false);
+  assert.match(assignmentBlockers(blocked[0], [person], blocked)[0].reason, /No availability/);
+  const available = {...person, availability: [{day: new Date(task.date + "T12:00:00").getDay(), start: 900, end: 960}]};
+  const assigned = generate(blocked, [available]);
+  assert.equal(assigned[0].caregiver, person.id);
+  assert.equal(assigned[0].status, "proposed");
+  assert.deepEqual(conflicts(assigned, [available]), []);
+});
+
+test("unassigned tasks report overlap rather than pretending assignment succeeded", () => {
+  const seed = demo();
+  const task: Task = {...seed.tasks[0], id: "one", status: "unassigned", caregiver: undefined, start: undefined, required: [], excluded: [], duration: 60, buffer: 0, earliest: 900, latest: 960, fixed: true};
+  task.allowedDates = [task.date];
+  const person = {...seed.caregivers[0], exceptions: [], availability: [{day: new Date(task.date + "T12:00:00").getDay(), start: 900, end: 960}]};
+  const plan = generate([task, {...task, id: "two"}], [person]);
+  assert.equal(plan.filter(active).length, 1);
+  const remaining = plan.find(t => !active(t))!;
+  assert.match(assignmentBlockers(remaining, [person], plan)[0].reason, /overlaps/);
+  assert.match(assignmentBlockers({...remaining, required: ["Driving"]}, [{...person, capabilities: []}], plan)[0].reason, /Driving/);
 });

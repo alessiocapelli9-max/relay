@@ -88,6 +88,7 @@ export function PersonEditor({
             type="button"
             key={c}
             className={p.capabilities.includes(c) ? "selected" : ""}
+            aria-pressed={p.capabilities.includes(c)}
             onClick={() =>
               patch({
                 capabilities: p.capabilities.includes(c)
@@ -100,7 +101,9 @@ export function PersonEditor({
           </button>
         ))}
       </div>
+      {!p.capabilities.length && <p className="muted">Select the kinds of tasks this person can help with so Relay can assign matching tasks.</p>}
       <label>Weekly availability</label>
+      {!p.availability.length && <p className="muted">Choose at least one day and time when this person can help before assigning tasks.</p>}
       {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d, day) => {
         const w = p.availability.find((x) => x.day === day);
         return (

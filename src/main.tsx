@@ -40,6 +40,7 @@ import {
   changed,
   expand,
   reasons,
+  assignmentBlockers,
 } from "./engine/scheduler";
 import { demo } from "./data";
 import { PersonEditor } from "./components/Editors";
@@ -52,7 +53,7 @@ import "./flow.css";
 
 type Page = "home" | "plan" | "people" | "about" | "settings" | "activity";
 type Modal =
-  "task" | "person" | "detail" | "repair" | "setup" | "simulate" | null;
+  "task" | "person" | "detail" | "repair" | "setup" | "simulate" | "assignments" | null;
 const statusText: Record<Status, string> = {
   confirmed: "Confirmed",
   completed: "Done",
@@ -90,6 +91,7 @@ export default function App({initialState,onChange}:{initialState:State;onChange
     [toast, N] = useState(""),
     [undo, U] = useState<State>(),
     [busy, BS] = useState(false),
+    [assignmentReport, setAssignmentReport] = useState<{tasks: Task[]; assigned: number} | null>(null),
     [demoStart, DS] = useState(0),
     [plans, PL] = useState<ReturnType<typeof alternatives>>([]),
     [before, B] = useState<Task[]>([]),
@@ -203,22 +205,28 @@ export default function App({initialState,onChange}:{initialState:State;onChange
     TE(undefined);
     M("detail");
   }
-  function run() {
+  function run(source: State = s) {
+    if (busy) return;
     BS(true);
     setTimeout(() => {
-      const expanded = expand(s.templates, s.tasks, week),
-        plan = generate(
-          expanded.filter((t) => weekOf(t.date) === week),
-          s.caregivers,
-        );
-      save(
-        {
-          ...s,
-          tasks: [...expanded.filter((t) => weekOf(t.date) !== week), ...plan],
-        },
-        "Relay suggested a plan. Each person still needs to accept their new tasks.",
-      );
-      BS(false);
+      try {
+        const expanded = expand(source.templates, source.tasks, week);
+        const original = expanded.filter((t) => weekOf(t.date) === week);
+        const plan = generate(original, source.caregivers);
+        const assigned = plan.filter((t) => active(t) && changed(original.find((o) => o.id === t.id)!, t)).length;
+        const remaining = plan.filter((t) => !active(t) && t.status !== "cancelled" && t.status !== "completed").length;
+        const message = assigned
+          ? `Suggested ${assigned} ${assigned === 1 ? "assignment" : "assignments"}; ${remaining} ${remaining === 1 ? "task still needs" : "tasks still need"} help.`
+          : remaining ? "No new assignments were possible with the current availability and task requirements."
+          : "The current tasks already have assignments.";
+        save({...source, tasks: [...expanded.filter((t) => weekOf(t.date) !== week), ...plan]}, message);
+        setAssignmentReport({tasks: plan, assigned});
+        M("assignments");
+      } catch {
+        N("Assignments could not be checked. Please try again.");
+      } finally {
+        BS(false);
+      }
     }, 100);
   }
   function repair(simulate = false, source: State = s) {
@@ -590,7 +598,7 @@ export default function App({initialState,onChange}:{initialState:State;onChange
                 <button
                   className="primary"
                   disabled={busy}
-                  onClick={() => s.caregivers.length ? repair() : go("people")}
+                  onClick={() => s.caregivers.length ? run() : go("people")}
                 >
                   {busy ? "Checking availability…" : (s.caregivers.length ? "Find someone to help" : "Add people first")}
                   <ArrowRight size={16} />
@@ -678,7 +686,7 @@ export default function App({initialState,onChange}:{initialState:State;onChange
                 </div>
               )}
             </section>
-            <details className="plan-tools"><summary>More planning options</summary><div className="plan-bottom"><button onClick={run} disabled={busy || !s.caregivers.length}>{busy ? "Planning…" : "Suggest assignments / add repeating tasks"}</button><button onClick={() => {SP(s.caregivers[0]?.id || "");SD(week);M("simulate");}} disabled={!s.caregivers.length}>Try someone being unavailable</button></div></details>
+            <details className="plan-tools"><summary>More planning options</summary><div className="plan-bottom"><button onClick={() => run()} disabled={busy || !s.caregivers.length}>{busy ? "Planning…" : "Suggest assignments / add repeating tasks"}</button><button onClick={() => {SP(s.caregivers[0]?.id || "");SD(week);M("simulate");}} disabled={!s.caregivers.length}>Try someone being unavailable</button></div></details>
             <details className="secondary-panel">
               <summary>
                 Repeating tasks <span>{s.templates.length}</span>
@@ -1007,7 +1015,7 @@ export default function App({initialState,onChange}:{initialState:State;onChange
             aria-label={
               modal === "repair"
                 ? "Review replacement plan"
-                : modal === "setup"
+                : modal === "assignments" ? "Assignment results" : modal === "setup"
                   ? "Start a care plan"
                   : "Care details"
             }
@@ -1020,6 +1028,35 @@ export default function App({initialState,onChange}:{initialState:State;onChange
             >
               <X size={20} />
             </button>
+            {modal === "assignments" && assignmentReport && <>
+              <h2>{assignmentReport.assigned ? "Assignments suggested" : "Assignment results"}</h2>
+              <p>{assignmentReport.assigned
+                ? `Relay suggested ${assignmentReport.assigned} ${assignmentReport.assigned === 1 ? "assignment" : "assignments"}. Check with each person before confirming.`
+                : "No new assignments were made. Review the results below to see what needs attention."}</p>
+              <div className="assignment-results">
+                {assignmentReport.tasks.filter(t => t.status !== "cancelled").map(t => {
+                  const blockers = !active(t) && t.status !== "completed" ? assignmentBlockers(t, s.caregivers, assignmentReport.tasks) : [];
+                  return <article key={t.id}>
+                    <h3>{t.name}</h3>
+                    {active(t) ? <p>{who(t.caregiver)?.name} · {dayLabel(t.date)} at {friendlyTime(t.start!)} · {statusText[t.status]}</p>
+                      : t.status === "completed" ? <p>Completed</p> : <>
+                        <p>No one could be assigned with the current settings.</p>
+                        <ul>{blockers.map(b => <li key={b.person?.id || "none"}>
+                          {b.person ? <><b>{b.person.name}:</b> {b.reason}
+                            {t.required.some(skill => !b.person!.capabilities.includes(skill)) && <button disabled={busy} className="text-button" onClick={() => {
+                              const updated = {...b.person!, capabilities: [...new Set([...b.person!.capabilities, ...t.required])]};
+                              run({...s, caregivers: s.caregivers.map(p => p.id === updated.id ? updated : p)});
+                            }}>Allow {t.required.filter(skill => !b.person!.capabilities.includes(skill)).join(", ")} for {b.person.name} and retry</button>}
+                            <button className="text-button" onClick={() => {C(b.person); M("person");}}>Edit availability and abilities</button></> : b.reason}
+                        </li>)}</ul>
+                        <button onClick={() => {T(t); TE(undefined); M("task");}}>Edit task time or requirements</button>
+                      </>}
+                  </article>;
+                })}
+                {!assignmentReport.tasks.length && <p>Add a task to this week before assigning people.</p>}
+              </div>
+              <footer><button onClick={() => {M(null); go("people");}}>Review people</button><button className="primary" onClick={() => {M(null); go("plan");}}>Back to weekly plan</button></footer>
+            </>}
             {modal === "task" && (
               <TaskEditor
                 task={edit}

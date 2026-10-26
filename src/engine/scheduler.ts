@@ -287,3 +287,32 @@ export function explain(t: Task, people: Caregiver[]) {
     ? `${c.name} is available for the full ${t.duration} minutes${t.buffer ? ` plus ${t.buffer}-minute buffers` : ""}${t.required.length ? ` and can help with ${t.required.join(", ").toLowerCase()}` : ""}. This placement fits the task window without overlapping commitments.`
     : `No eligible placement was found within the search limit. Review availability or ask an approved backup.`;
 }
+
+// Show the closest valid-time attempt for each person instead of claiming success
+// when the search cannot place a task.
+export function assignmentBlockers(t: Task, people: Caregiver[], schedule: Task[]): {person?: Caregiver; reason: string}[] {
+  if (!people.length) return [{reason: "Add someone who can help, including the times they are available."}];
+  return people.map(person => {
+    if (!person.availability.length) return {person, reason: "No availability has been added yet."};
+    const missing = t.required.filter(r => !person.capabilities.includes(r));
+    if (missing.length) return {person, reason: `Their abilities do not include ${missing.join(", ")}.`};
+    let closest: string[] | undefined;
+    for (const date of t.fixed ? [t.date] : t.allowedDates.filter(d => weekOf(d) === weekOf(t.date))) {
+      for (let start = t.earliest; start + t.duration <= t.latest; start += 15) {
+        const why = reasons(t, person, date, start, schedule);
+        if (!closest || why.length < closest.length) closest = why;
+        if (t.fixed) break;
+      }
+    }
+    const messages: Record<string,string> = {
+      "Not available for the full duration and buffer": "Their available hours do not cover the task and its travel buffer.",
+      "Availability exception": "They have time off during this task.",
+      "Overlapping responsibility or travel buffer": "Another task or its travel buffer overlaps this time.",
+      "Caregiver declined this responsibility": "They previously declined this task.",
+      "Outside the allowed time window": "The task does not fit its allowed time window.",
+    };
+    return {person, reason: closest === undefined ? "The task needs a time window long enough to fit its duration."
+      : closest.length ? closest.map(r => messages[r] || r).join(" ")
+      : "They may be available, but the planner could not fit this task alongside the other assignments. Try adjusting its time."};
+  });
+}
