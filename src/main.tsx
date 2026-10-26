@@ -44,6 +44,7 @@ import {
 } from "./engine/scheduler";
 import { demo } from "./data";
 import { PersonEditor } from "./components/Editors";
+import { ManualAssignment } from "./components/ManualAssignment";
 import { TaskForm as TaskEditor } from "./components/TaskForm";
 import { Walkthrough, friendlyTime } from "./components/Walkthrough";
 import { RepairReview } from "./components/RepairReview";
@@ -481,7 +482,7 @@ export default function App({initialState,onChange}:{initialState:State;onChange
           <nav className="setup-path" aria-label="Plan steps">
             <button onClick={() => go("people")}><span>1</span> People <small>{s.caregivers.length} added</small></button>
             <button onClick={() => go("plan")}><span>2</span> Tasks <small>{live.length} this week</small></button>
-            <button disabled={!s.caregivers.length || !live.length || busy} onClick={() => {go("plan");run();}}><span>3</span> Assign people</button>
+            <button disabled={!s.caregivers.length || !live.length || busy} onClick={() => {go("plan");run();}}><span>3</span> Auto-assign people</button>
           </nav>
         </>}
 
@@ -533,7 +534,7 @@ export default function App({initialState,onChange}:{initialState:State;onChange
                 <div>
                   <h1>{s.recipient}’s weekly plan</h1>
                   <p>
-                    Select a task to update it.
+                    Select a task to assign someone or update its details.
                   </p>
                 </div>
                 <button className="primary" onClick={newTask}>
@@ -600,7 +601,7 @@ export default function App({initialState,onChange}:{initialState:State;onChange
                   disabled={busy}
                   onClick={() => s.caregivers.length ? run() : go("people")}
                 >
-                  {busy ? "Checking availability…" : (s.caregivers.length ? "Find someone to help" : "Add people first")}
+                  {busy ? "Checking availability…" : (s.caregivers.length ? "Suggest automatically" : "Add people first")}
                   <ArrowRight size={16} />
                 </button>
               </div>
@@ -1144,6 +1145,24 @@ export default function App({initialState,onChange}:{initialState:State;onChange
                 )}
                 {edit.description && <p>{edit.description}</p>}
                 {edit.notes && <p>{edit.notes}</p>}
+                {!["completed", "cancelled"].includes(edit.status) && <ManualAssignment
+                  key={edit.id + ":" + (edit.caregiver || "")}
+                  task={s.tasks.find(t => t.id === edit.id) || edit}
+                  people={s.caregivers}
+                  schedule={s.tasks}
+                  onPeople={() => {M(null); go("people");}}
+                  onAssign={(personId, date, start) => {
+                    const current = s.tasks.find(t => t.id === edit.id);
+                    const selected = who(personId);
+                    if (!current || !selected || ["completed", "cancelled"].includes(current.status) || reasons(current, selected, date, start, s.tasks).length) {
+                      N("Availability has changed. Please choose an available person and time.");
+                      return;
+                    }
+                    const next: Task = {...current, caregiver: personId, date, start, status: "proposed"};
+                    update(next, `${selected.name} assigned to ${current.name}. Confirm after checking with them.`);
+                    T(next);
+                  }}
+                />}
                 {["proposed", "pending"].includes(edit.status) &&
                   !needsHelp(edit) && (
                     <div className="response-box">
@@ -1182,7 +1201,7 @@ export default function App({initialState,onChange}:{initialState:State;onChange
                     disabled={busy}
                     onClick={() => s.caregivers.length ? repair() : go("people")}
                   >
-                    {busy ? "Finding a replacement…" : (s.caregivers.length ? "Find someone to help" : "Add people first")}
+                    {busy ? "Finding a replacement…" : (s.caregivers.length ? "Suggest automatically" : "Add people first")}
                     <ArrowRight size={17} />
                   </button>
                 )}

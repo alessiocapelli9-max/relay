@@ -9,8 +9,25 @@ import {
   active,
   expand,
   assignmentBlockers,
+  candidates,
 } from "../engine/scheduler";
 import { Task, weekOf, today } from "../models";
+test("manual choices respect skills, declined people, days off and existing assignments", () => {
+  const seed = demo();
+  const task: Task = {...seed.tasks[0], id: "manual", status: "unassigned", caregiver: undefined, start: undefined, required: ["Companionship"], excluded: [], duration: 60, buffer: 0, earliest: 900, latest: 1080, fixed: false};
+  task.allowedDates = [task.date];
+  const person = {...seed.caregivers[0], id: "eligible", capabilities: ["Companionship"], exceptions: [], availability: [{day: new Date(task.date + "T12:00:00").getDay(), start: 900, end: 1080}]};
+  const others = [{...person, id: "missing-skill", capabilities: []}, {...person, id: "day-off", exceptions: [{date: task.date, start: 0, end: 1440}]}, {...person, id: "declined"}];
+  task.excluded = ["declined"];
+  const existing: Task = {...task, id: "existing", caregiver: person.id, start: 900, status: "confirmed"};
+  const choices = candidates(task, [person, ...others], [existing]);
+  assert.ok(choices.length > 0);
+  assert.ok(choices.every(c => c.caregiver === person.id && c.start >= 960));
+  const chosen = choices[0];
+  const assigned: Task = {...task, caregiver: chosen.caregiver, date: chosen.date, start: chosen.start, status: "proposed"};
+  assert.deepEqual(conflicts([existing, assigned], [person]), []);
+  assert.ok(candidates(assigned, [person], [existing, assigned]).some(c => c.start === assigned.start));
+});
 test("demo and generated plans obey every hard constraint", () => {
   const s = demo();
   assert.equal(s.tasks.length, 18);
