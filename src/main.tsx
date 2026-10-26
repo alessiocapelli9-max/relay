@@ -945,7 +945,7 @@ export default function App({initialState,onChange}:{initialState:State;onChange
         {page === "settings" && (
           <section className="settings-page">
             <span className="eyebrow">YOUR CARE PLAN</span>
-            <h1>A few practical details.</h1>
+            <h1>Care plan details</h1>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -969,8 +969,7 @@ export default function App({initialState,onChange}:{initialState:State;onChange
                 <textarea name="preferences" defaultValue={s.preferences} />
               </label>
               <p className="field-help">
-                These are notes for the family. Task times and availability
-                guide the scheduling.
+                These notes are for your family; Relay uses task times and each person’s availability when planning the week.
               </p>
               <button className="primary">Save details</button>
             </form>
