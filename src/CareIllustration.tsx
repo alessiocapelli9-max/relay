@@ -18,5 +18,4 @@ export default function CareIllustration(){return (              <figure classNa
                   <path d="M243 430L250 367L278 323Q287 313 294 321L285 352L311 344Q323 341 325 353L309 384L310 430" fill="#c4815b" stroke="#282e29" strokeWidth="2"/>
                   <path d="M227 430L239 391L322 401L329 430" fill="#324e45"/>
                 </svg>
-                <figcaption><span>01 / EVERYDAY CARE</span><span>A little help, shared.</span></figcaption>
               </figure>);}
