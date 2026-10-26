@@ -12,8 +12,8 @@ export default function PlansIllustration() {
         <path d="M339 93l3-11M342 91c7-10 16-13 26-10-4 10-12 15-26 10Z" fill="#496e5e" stroke="#282e29" strokeWidth="2" strokeLinecap="round" />
         <path d="M370 132l12-66c2-13 14-20 24-17 11 3 16 15 13 27l-15 56" fill="#f3dfb8" stroke="#282e29" strokeWidth="3" strokeLinejoin="round" />
         <path d="M385 77l23 17M381 98l22 16" stroke="#c6a77d" strokeWidth="2" />
-        <path d="M408 132c4-19 11-34 23-46M420 130c10-17 20-25 34-29" fill="none" stroke="#324e45" strokeWidth="4" strokeLinecap="round" />
-        <path d="M426 96c-14-11-17-22-14-35 16 6 21 18 14 35ZM439 109c8-15 19-23 34-24-3 16-14 24-34 24Z" fill="#496e5e" stroke="#282e29" strokeWidth="2" strokeLinejoin="round" />
+        <path d="M408 132c6-18 17-31 32-38M420 130c10-17 20-25 34-29" fill="none" stroke="#324e45" strokeWidth="4" strokeLinecap="round" />
+        <path d="M440 94c-7-15-6-28 4-39 12 11 13 24-4 39ZM439 109c8-15 19-23 34-24-3 16-14 24-34 24Z" fill="#496e5e" stroke="#282e29" strokeWidth="2" strokeLinejoin="round" />
         <path d="M285 130h160l-14 152H299Z" fill="#e9b95d" stroke="#282e29" strokeWidth="3" strokeLinejoin="round" />
         <path d="M285 130l14 12v140ZM445 130l-14 12v140Z" fill="#d19d4e" stroke="#282e29" strokeWidth="2" />
         <path d="M299 142h132M301 257h128" stroke="#cb9a44" strokeWidth="2" />
